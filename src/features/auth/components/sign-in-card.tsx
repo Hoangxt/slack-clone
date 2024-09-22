@@ -12,6 +12,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
+// convex
+import { useAuthActions } from '@convex-dev/auth/react';
+
 import { SignInFlow } from '../types';
 
 interface SignInCardProps {
@@ -19,9 +22,15 @@ interface SignInCardProps {
 }
 
 export const SignInCard = ({ setState }: SignInCardProps) => {
+  const { signIn } = useAuthActions();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
+
+  const onProviderSignIn = (value: 'github' | 'google') => {
+    signIn(value);
+  };
 
   return (
     <Card className='w-full h-full p-8'>
@@ -74,9 +83,8 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
           </Button>
           <Button
             type='button'
-            // disabled={pending}
-            // onClick={() => onProviderSignIn("github")}
-            disabled={false}
+            disabled={pending}
+            onClick={() => onProviderSignIn('github')}
             variant={'outline'}
             size={'lg'}
             className='w-full relative'
