@@ -29,7 +29,10 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   const [pending, setPending] = useState(false);
 
   const onProviderSignIn = (value: 'github' | 'google') => {
-    signIn(value);
+    setPending(true);
+    signIn(value).finally(() => {
+      setPending(false);
+    });
   };
 
   return (
@@ -71,9 +74,8 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
         <div className='flex flex-col gap-y-2.5'>
           <Button
             type='button'
-            // disabled={pending}
-            // onClick={() => onProviderSignIn("google")}
-            disabled={false}
+            disabled={pending}
+            onClick={() => onProviderSignIn('google')}
             variant={'outline'}
             size={'lg'}
             className='w-full relative'
