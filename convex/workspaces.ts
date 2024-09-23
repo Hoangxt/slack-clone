@@ -1,17 +1,17 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 
-// import { Doc } from './_generated/dataModel';
+import { Doc } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 
-// const generateCode = () => {
-//   const code = Array.from(
-//     { length: 6 },
-//     () => '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 36)]
-//   ).join('');
+const generateCode = () => {
+  const code = Array.from(
+    { length: 6 },
+    () => '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 36)]
+  ).join('');
 
-//   return code;
-// };
+  return code;
+};
 
 export const create = mutation({
   args: {
@@ -24,13 +24,18 @@ export const create = mutation({
       throw new Error('Unauthorized');
     }
 
-    // const joinCode = generateCode();
-    const joinCode = '123456';
+    const joinCode = generateCode();
 
     const workspaceId = await ctx.db.insert('workspaces', {
       name: args.name,
       userId,
       joinCode,
+    });
+
+    await ctx.db.insert('members', {
+      userId,
+      workspaceId,
+      role: 'admin',
     });
 
     return workspaceId;
@@ -40,6 +45,30 @@ export const create = mutation({
 export const get = query({
   args: {},
   handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return [];
+    }
+
+    // find all workspace this user is member of
+    const members = await ctx.db
+      .query('members')
+      .withIndex('by_user_id', (q) => q.eq('userId', userId))
+      .collect();
+
+    const workspaceIds = members.map((member) => member.workspaceId);
+
+    const workspaces: Doc<'workspaces'>[] = [];
+
+    for (const workspaceId of workspaceIds) {
+      const workspace = await ctx.db.get(workspaceId);
+
+      if (workspace) {
+        workspaces.push(workspace);
+      }
+    }
+
     return await ctx.db.query('workspaces').collect();
   },
 });
@@ -55,16 +84,16 @@ export const getById = query({
       throw new Error('Unauthorized');
     }
 
-    // const member = await ctx.db
-    //   .query('members')
-    //   .withIndex('by_workspace_id_user_id', (q) =>
-    //     q.eq('workspaceId', args.id).eq('userId', userId)
-    //   )
-    //   .unique();
+    const member = await ctx.db
+      .query('members')
+      .withIndex('by_workspace_id_user_id', (q) =>
+        q.eq('workspaceId', args.id).eq('userId', userId)
+      )
+      .unique();
 
-    // if (!member) {
-    //   return null;
-    // }
+    if (!member) {
+      return null;
+    }
 
     return await ctx.db.get(args.id);
   },
