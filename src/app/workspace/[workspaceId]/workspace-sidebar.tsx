@@ -7,28 +7,44 @@ import {
 } from 'lucide-react';
 
 // Api
-// import { useGetMembers } from "@/features/members/api/use-get-members";
-// import { useGetChannels } from "@/features/channels/api/use-get-channels";
+import { useGetMembers } from '@/features/members/api/use-get-members';
+import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useCurrentMember } from '@/features/members/api/use-current-member';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
-// import { useCreateChannelModal } from "@/features/channels/store/use-create-channel-modal";
+// import { useCreateChannelModal } from '@/features/channels/store/use-create-channel-modal';
 
 // Hooks
-// import { useMemberId } from "@/hooks/use-member-id";
-// import { useChannelId } from "@/hooks/use-channel-id";
+
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { useChannelId } from '@/hooks/use-channel-id';
+import { useMemberId } from '@/hooks/use-member-id';
 import { WorkspaceHeader } from './workspace-header';
-// import { DevelopmentMode } from "@/components/development-mode";
+import { WorkspaceSection } from './workspace-section';
+import { DevelopmentMode } from '@/components/development-mode';
+import { SidebarItem } from './sidebar-item';
+import { UserItem } from './user-item';
 
 export const WorkspaceSidebar = () => {
   const workspaceId = useWorkspaceId();
+  const channelId = useChannelId();
+  const memberId = useMemberId();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const [_open, setOpen] = useCreateChannelModal();
+
+  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({
+    id: workspaceId,
+  });
 
   const { data: member, isLoading: memberLoading } = useCurrentMember({
     workspaceId,
   });
 
-  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({
-    id: workspaceId,
+  const { data: members } = useGetMembers({
+    workspaceId,
+  });
+
+  const { data: channels } = useGetChannels({
+    workspaceId,
   });
 
   if (workspaceLoading || memberLoading) {
@@ -54,6 +70,50 @@ export const WorkspaceSidebar = () => {
         workspace={workspace}
         isAdmin={member.role === 'admin'}
       />
+      <div className='flex flex-col px-2 mt-3'>
+        <DevelopmentMode>
+          <SidebarItem
+            id='threads'
+            label='Threads'
+            icon={MessageSquareText}
+            disabled
+          />
+        </DevelopmentMode>
+        <DevelopmentMode>
+          <SidebarItem
+            id='drafts'
+            label='Drafts & Sent'
+            icon={SendHorizontal}
+            disabled
+          />
+        </DevelopmentMode>
+      </div>
+      <WorkspaceSection
+        label='Channels'
+        hint='New channel'
+        // onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
+      >
+        {channels?.map((item) => (
+          <SidebarItem
+            key={item._id}
+            icon={HashIcon}
+            label={item.name}
+            id={item._id}
+            variant={channelId === item._id ? 'active' : 'default'}
+          />
+        ))}
+      </WorkspaceSection>
+      <WorkspaceSection label='Direct Messages' hint='New direct message'>
+        {members?.map((item) => (
+          <UserItem
+            key={item._id}
+            id={item._id}
+            label={item.user.name}
+            image={item.user.image}
+            variant={item._id === memberId ? 'active' : 'default'}
+          />
+        ))}
+      </WorkspaceSection>
     </div>
   );
 };

@@ -1,14 +1,9 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 
-import { Id } from './_generated/dataModel';
-import { mutation, query, QueryCtx } from './_generated/server';
+import { mutation, query } from './_generated/server';
 
-const populateUser = (ctx: QueryCtx, id: Id<'users'>) => {
-  return ctx.db.get(id);
-};
-
-// get all member
+// get all channels in workspaces
 export const get = query({
   args: {
     workspaceId: v.id('workspaces'),
@@ -31,37 +26,21 @@ export const get = query({
       return [];
     }
 
-    const data = await ctx.db
-      .query('members')
+    const channels = await ctx.db
+      .query('channels')
       .withIndex('by_workspace_id', (q) =>
         q.eq('workspaceId', args.workspaceId)
       )
       .collect();
 
-    const members = [];
-
-    for (const member of data) {
-      const user = await populateUser(ctx, member.userId);
-
-      if (user) {
-        members.push({
-          ...member,
-          user,
-        });
-      }
-    }
-    const sortedMembers = members.sort((a, b) => {
-      if (a.user.name! < b.user.name!) return -1;
-      if (a.user.name! < b.user.name!) return 1;
-      return 0;
-    });
-
-    return sortedMembers;
+    return channels;
   },
 });
 
-export const current = query({
-  args: { workspaceId: v.id('workspaces') },
+export const getById = query({
+  args: {
+    id: v.id('channels'),
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
@@ -69,10 +48,16 @@ export const current = query({
       return null;
     }
 
+    const channel = await ctx.db.get(args.id);
+
+    if (!channel) {
+      return null;
+    }
+
     const member = await ctx.db
       .query('members')
       .withIndex('by_workspace_id_user_id', (q) =>
-        q.eq('workspaceId', args.workspaceId).eq('userId', userId)
+        q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
       )
       .unique();
 
@@ -80,6 +65,6 @@ export const current = query({
       return null;
     }
 
-    return member;
+    return channel;
   },
 });
