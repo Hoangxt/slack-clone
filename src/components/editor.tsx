@@ -9,6 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 
 import { Hint } from './hint';
+import { EmojiPopover } from './emoji-popover';
 import { Button } from './ui/button';
 
 import Image from 'next/image';
@@ -158,6 +159,13 @@ const Editor = ({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onEmojiSelect = (emoji: any) => {
+    const quill = quillRef.current;
+
+    quill?.insertText(quill?.getSelection()?.index || 0, emoji.native);
+  };
+
   // kiểm tra state của text có đang trống không isEmpty=true -> ko có kí tụ nào trong đoạn chat
   // xóa các kí tự  vd <div></div>, <P></P>
   const isEmpty = !image && text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
@@ -181,11 +189,11 @@ const Editor = ({
               <PiTextAa className='size-4' />
             </Button>
           </Hint>
-          <Hint label='Emoji'>
+          <EmojiPopover onEmojiSelect={onEmojiSelect}>
             <Button disabled={disabled} size='iconSm' variant='ghost'>
               <Smile className='size-4' />
             </Button>
-          </Hint>
+          </EmojiPopover>
           {variant === 'create' && (
             <Hint label='Image'>
               <Button
@@ -204,7 +212,7 @@ const Editor = ({
               <Button
                 size='sm'
                 variant='outline'
-                disabled={false}
+                disabled={disabled}
                 onClick={() => {}}
               >
                 Cancel
@@ -238,11 +246,18 @@ const Editor = ({
         </div>
       </div>
 
-      <div className='flex justify-end p-2 text-[10px] text-muted-foreground'>
-        <p>
-          <strong>Shift + Enter</strong> to add a new line
-        </p>
-      </div>
+      {variant === 'create' && (
+        <div
+          className={cn(
+            'p-2 text-[10px] text-[#007A5A] flex justify-end opacity-0 transition',
+            !isEmpty && 'opacity-100'
+          )}
+        >
+          <p>
+            <strong>Shift + Enter</strong> to add a new line
+          </p>
+        </div>
+      )}
     </div>
   );
 };
