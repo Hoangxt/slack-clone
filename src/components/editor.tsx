@@ -56,8 +56,8 @@ const Editor = ({
   const defaultValueRef = useRef(defaultValue);
   const disabledRef = useRef(disabled);
 
-  const imageElementRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<Quill | null>(null);
+  const imageElementRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ko can add het vao dep cua useEffect
@@ -96,6 +96,7 @@ const Editor = ({
                 const text = quill.getText();
                 const addedImage = imageElementRef.current?.files?.[0] || null;
 
+                // nếu không có ảnh và text thì -> user chưa type gì
                 const isEmpty =
                   !addedImage &&
                   text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
@@ -174,8 +175,47 @@ const Editor = ({
 
   return (
     <div className='flex flex-col'>
-      <div className='flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white'>
+      {/* input ao (phantom) image*/}
+      <input
+        type='file'
+        accept='image/*'
+        ref={imageElementRef}
+        onChange={(e) => setImage(e.target.files![0])}
+        className='hidden'
+      />
+      <div
+        className={cn(
+          'flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white',
+          disabled && 'opacity-50'
+        )}
+      >
         <div ref={containerRef} className='h-full ql-custom' />
+
+        {/* Nếu có image trong chat có thể xóa nó đi (phải có ảnh mới hiện ra) */}
+        {!!image && (
+          <div className='p-2'>
+            <div className='relative size-[62px] flex items-center justify-center group/image'>
+              {/* xóa ảnh trong chat nếu có */}
+              <Hint label='Remove image'>
+                <button
+                  onClick={() => {
+                    setImage(null);
+                    imageElementRef.current!.value = '';
+                  }}
+                  className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
+                >
+                  <XIcon className='size-3.5' />
+                </button>
+              </Hint>
+              <Image
+                src={URL.createObjectURL(image)}
+                alt='Uploaded'
+                fill
+                className='rounded-xl overflow-hidden border object-cover'
+              />
+            </div>
+          </div>
+        )}
         <div className='flex px-2 pb-2 z-[5]'>
           <Hint
             label={isToolbarVisible ? 'Hide formatting' : 'Show formatting'}
@@ -198,7 +238,7 @@ const Editor = ({
             <Hint label='Image'>
               <Button
                 disabled={disabled}
-                onClick={() => {}}
+                onClick={() => imageElementRef.current?.click()}
                 size='iconSm'
                 variant='ghost'
               >
@@ -213,7 +253,7 @@ const Editor = ({
                 size='sm'
                 variant='outline'
                 disabled={disabled}
-                onClick={() => {}}
+                onClick={onCancel}
               >
                 Cancel
               </Button>
@@ -221,7 +261,12 @@ const Editor = ({
                 size='sm'
                 className='bg-[#007A5A]  hover:bg-[#007A5A]/80 text-white'
                 disabled={disabled || isEmpty}
-                onClick={() => {}}
+                onClick={() => {
+                  onSubmit({
+                    body: JSON.stringify(quillRef.current?.getContents()),
+                    image,
+                  });
+                }}
               >
                 Save
               </Button>
@@ -231,7 +276,12 @@ const Editor = ({
           {variant === 'create' && (
             <Button
               disabled={disabled || isEmpty}
-              onClick={() => {}}
+              onClick={() => {
+                onSubmit({
+                  body: JSON.stringify(quillRef.current?.getContents()),
+                  image,
+                });
+              }}
               size='iconSm'
               className={cn(
                 'ml-auto',
