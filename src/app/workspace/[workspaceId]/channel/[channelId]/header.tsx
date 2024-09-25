@@ -46,6 +46,7 @@ export const Header = ({ title }: HeaderProps) => {
 
   const { mutate: updateChannel, isPending: isUpdatingChannel } =
     useUpdateChannel();
+
   const { mutate: removeChannel, isPending: isRemovingChannel } =
     useRemoveChannel();
 
@@ -103,7 +104,10 @@ export const Header = ({ title }: HeaderProps) => {
       <ConfirmRemoveDialog />
       <Dialog>
         <DialogTrigger asChild>
-          <Button>
+          <Button
+            variant='ghost'
+            className='text-lg font-semibold px-2 overflow-hidden w-auto'
+          >
             <span className='truncate'># {title}</span>
             <FaChevronDown className='size-2.5 ml-2' />
           </Button>
