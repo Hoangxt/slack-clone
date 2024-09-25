@@ -123,91 +123,7 @@ export const create = mutation({
     return workspaceId;
   },
 });
-
-export const get = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      return [];
-    }
-
-    // find all workspace this user is member of
-    const members = await ctx.db
-      .query('members')
-      .withIndex('by_user_id', (q) => q.eq('userId', userId))
-      .collect();
-
-    const workspaceIds = members.map((member) => member.workspaceId);
-
-    const workspaces: Doc<'workspaces'>[] = [];
-
-    for (const workspaceId of workspaceIds) {
-      const workspace = await ctx.db.get(workspaceId);
-
-      if (workspace) {
-        workspaces.push(workspace);
-      }
-    }
-
-    return await ctx.db.query('workspaces').collect();
-  },
-});
-
-export const getInfoById = query({
-  args: {
-    id: v.id('workspaces'),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      return null;
-    }
-
-    const member = await ctx.db
-      .query('members')
-      .withIndex('by_workspace_id_user_id', (q) =>
-        q.eq('workspaceId', args.id).eq('userId', userId)
-      )
-      .unique();
-
-    const workspace = await ctx.db.get(args.id);
-
-    return {
-      name: workspace?.name,
-      isMember: !!member,
-    };
-  },
-});
-
-export const getById = query({
-  args: {
-    id: v.id('workspaces'),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      throw new Error('Unauthorized');
-    }
-
-    const member = await ctx.db
-      .query('members')
-      .withIndex('by_workspace_id_user_id', (q) =>
-        q.eq('workspaceId', args.id).eq('userId', userId)
-      )
-      .unique();
-
-    if (!member) {
-      return null;
-    }
-
-    return await ctx.db.get(args.id);
-  },
-});
-
+// update workspace
 export const update = mutation({
   args: {
     id: v.id('workspaces'),
@@ -310,5 +226,89 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
 
     return args.id;
+  },
+});
+
+export const get = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return [];
+    }
+
+    // find all workspace this user is member of
+    const members = await ctx.db
+      .query('members')
+      .withIndex('by_user_id', (q) => q.eq('userId', userId))
+      .collect();
+
+    const workspaceIds = members.map((member) => member.workspaceId);
+
+    const workspaces: Doc<'workspaces'>[] = [];
+
+    for (const workspaceId of workspaceIds) {
+      const workspace = await ctx.db.get(workspaceId);
+
+      if (workspace) {
+        workspaces.push(workspace);
+      }
+    }
+
+    return await ctx.db.query('workspaces').collect();
+  },
+});
+
+export const getInfoById = query({
+  args: {
+    id: v.id('workspaces'),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return null;
+    }
+
+    const member = await ctx.db
+      .query('members')
+      .withIndex('by_workspace_id_user_id', (q) =>
+        q.eq('workspaceId', args.id).eq('userId', userId)
+      )
+      .unique();
+
+    const workspace = await ctx.db.get(args.id);
+
+    return {
+      name: workspace?.name,
+      isMember: !!member,
+    };
+  },
+});
+
+export const getById = query({
+  args: {
+    id: v.id('workspaces'),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const member = await ctx.db
+      .query('members')
+      .withIndex('by_workspace_id_user_id', (q) =>
+        q.eq('workspaceId', args.id).eq('userId', userId)
+      )
+      .unique();
+
+    if (!member) {
+      return null;
+    }
+
+    return await ctx.db.get(args.id);
   },
 });
