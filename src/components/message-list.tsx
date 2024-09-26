@@ -9,6 +9,7 @@ import { useCurrentMember } from '@/features/members/api/use-current-member';
 import { Id } from '../../convex/_generated/dataModel';
 
 import { Message } from './message';
+import { ChannelHero } from './channel-hero';
 
 const TIME_THRESHOLD = 5;
 
@@ -110,10 +111,10 @@ export const MessageList = ({
           })}
         </div>
       ))}
-      {/* {variant === "channel" && channelName && channelCreationTime && (
+      {variant === 'channel' && channelName && channelCreationTime && (
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
       )}
-      {variant === "conversation" && (
+      {/* {variant === "conversation" && (
         <ConversationHero name={memberName} image={memberImage} />
       )} */}
     </div>
