@@ -19,7 +19,7 @@ const ChannelIdPage = () => {
     id: channelId,
   });
 
-  console.log({ results });
+  // console.log({ results });
 
   if (channelLoading) {
     return (

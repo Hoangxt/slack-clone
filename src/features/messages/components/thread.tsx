@@ -83,7 +83,7 @@ export const Thead = ({ messageId, onCloseMessage }: TheadProps) => {
       editorRef?.current?.enable(false);
 
       const values: CreateReplyMessageValues = {
-        channelId,
+        channelId, // undefined
         workspaceId,
         parentMessageId: messageId,
         body,
