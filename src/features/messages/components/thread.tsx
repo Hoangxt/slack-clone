@@ -220,7 +220,7 @@ export const Thead = ({ messageId, onCloseMessage }: TheadProps) => {
                   hideThreadButton
                   threadCount={message.threadCount}
                   threadImage={message.threadImage}
-                  // threadName={message.threadName}
+                  threadName={message.threadName}
                   threadTimestamp={message.threadTimestamp}
                 />
               );
