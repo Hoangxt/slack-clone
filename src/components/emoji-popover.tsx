@@ -2,6 +2,8 @@ import { useState } from 'react';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 
+// import EmojiPicker from '@emoji-mart/react';
+
 import {
   Tooltip,
   TooltipContent,
@@ -52,6 +54,7 @@ export const EmojiPopover = ({
         </Tooltip>
         <PopoverContent className='p-0 w-full border-none shadow-none'>
           <Picker data={data} onEmojiSelect={onSelect} />
+          {/* <EmojiPicker onEmojiSelect={onSelect} /> */}
         </PopoverContent>
       </Popover>
     </TooltipProvider>
