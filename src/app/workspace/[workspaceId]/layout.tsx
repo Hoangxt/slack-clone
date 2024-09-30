@@ -1,28 +1,32 @@
 'use client';
-
-import { Sidebar } from './sidebar';
-import { Toolbar } from './toolbar';
-
-import Thread from '@/features/messages/components/thread';
+import { Loader } from 'lucide-react';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { WorkspaceSidebar } from './workspace-sidebar';
-import { usePanel } from '@/hooks/use-panel';
-import { Loader } from 'lucide-react';
+
 import { Id } from '../../../../convex/_generated/dataModel';
+
+import { Sidebar } from './sidebar';
+import { Toolbar } from './toolbar';
+import { WorkspaceSidebar } from './workspace-sidebar';
+
+import Thread from '@/features/messages/components/thread';
+import { Profile } from '@/features/members/components/profile';
+
+import { usePanel } from '@/hooks/use-panel';
 
 interface WorkspaceIdLayoutProps {
   children: React.ReactNode;
 }
 
 const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
-  const { parentMessageId, onCloseMessage } = usePanel();
+  const { parentMessageId, profileMemberId, onCloseMessage, onCloseProfile } =
+    usePanel();
   // depending on parentMessageId we can show/hide the message panel
   // exp: http://localhost:3000/workspace/ks76zyj72k98rgbk53h5d67q6171ah5y/channel/k172yc1xaw9htnwe52sgzbrp5h71ebjz?parentMessageId=123 -> will show the message panel
-  const showPanel = !!parentMessageId;
+  const showPanel = !!parentMessageId || !!profileMemberId;
 
   return (
     <div className='h-full'>
@@ -52,6 +56,11 @@ const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
                   <Thread
                     messageId={parentMessageId as Id<'messages'>}
                     onCloseMessage={onCloseMessage}
+                  />
+                ) : profileMemberId ? (
+                  <Profile
+                    memberId={profileMemberId as Id<'members'>}
+                    onCloseProfile={onCloseProfile}
                   />
                 ) : (
                   <div className='flex h-full items-center justify-center'>
