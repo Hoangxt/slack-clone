@@ -12,9 +12,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { useCurrentUser } from '../api/use-current-user';
+// import { useRouter } from 'next/navigation';
 
 export const UserButton = () => {
+  // const router = useRouter();
   const { signOut } = useAuthActions();
+
+  // const handleSignOut = async () => {
+  //   await signOut();
+  //   router.push('/'); // Chuyển hướng đến trang chủ (Stack Clone) sau khi log out
+  // };
+
   const { data, isLoading } = useCurrentUser();
 
   if (isLoading) {

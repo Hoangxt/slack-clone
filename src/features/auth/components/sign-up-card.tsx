@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
 import { TriangleAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useAuthActions } from '@convex-dev/auth/react';
+
+import { SignInFlow } from '../types';
 import {
   Card,
   CardContent,
@@ -11,10 +13,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-
-import { SignInFlow } from '../types';
-import { useAuthActions } from '@convex-dev/auth/react';
 
 interface SignUpCardProps {
   setState: (state: SignInFlow) => void;
@@ -22,7 +22,6 @@ interface SignUpCardProps {
 
 export const SignUpCard = ({ setState }: SignUpCardProps) => {
   const { signIn } = useAuthActions();
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -58,7 +57,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
   return (
     <Card className='w-full h-full p-8'>
       <CardHeader className='px-0 pt-0'>
-        <CardTitle>Sign up continue</CardTitle>
+        <CardTitle>Sign up to continue</CardTitle>
         <CardDescription>
           Use your email or other service to continue
         </CardDescription>
@@ -69,7 +68,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
           <p>{error}</p>
         </div>
       )}
-      <CardContent className='space-y-5 px-0 pb-0'>
+      <CardContent className='space-y-4 px-0 pb-0'>
         <form onSubmit={onPasswordSignUp} className='space-y-2.5'>
           <Input
             disabled={pending}
@@ -98,7 +97,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             disabled={pending}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder='Confirm Password'
+            placeholder='Confirm password'
             type='password'
             required
           />
